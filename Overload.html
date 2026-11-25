@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Progressive overload takibi: antrenman kayıtları, hacim, rekorlar ve aylık hedefler.">
+  <title>Overload — Progressive Overload Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       1. Tema değişkenleri
+       ============================================================ */
+    :root {
+      --bg:            #0a0a0f;
+      --bg-subtle:     #121218;
+      --card:          #161620;
+      --card-hover:    #1e1e2a;
+      --fg:            #e8e8f0;
+      --fg-dim:        #b6b6c4;
+      --muted:         #737385;
+      --accent:        #00d4aa;
+      --accent-fg:     #04120e;
+      --accent-soft:   rgba(0, 212, 170, 0.12);
+      --warning:       #ff6b35;
+      --danger:        #f4526a;
+      --success:       #00d4aa;
+      --border:        #2a2a3a;
+      --border-strong: #3a3a50;
+      --shadow:        0 18px 40px -20px rgba(0, 0, 0, 0.85);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --transition:    160ms cubic-bezier(.4, 0, .2, 1);
+      --grid-line:     rgba(255, 255, 255, .045);
+    }
+
+    :root[data-theme="light"] {
+      --bg:            #f6f7f9;
+      --bg-subtle:     #eef0f4;
+      --card:          #ffffff;
+      --card-hover:    #f4f5f8;
+      --fg:            #12131a;
+      --fg-dim:        #454a58;
+      --muted:         #6b7080;
+      --accent:        #0a7f68;
+      --accent-fg:     #ffffff;
+      --accent-soft:   rgba(10, 127, 104, 0.10);
+      --warning:       #c2410c;
+      --danger:        #d1344c;
+      --success:       #0a7f68;
+      --border:        #e3e6ec;
+      --border-strong: #cdd2dc;
+      --shadow:        0 18px 40px -24px rgba(16, 24, 40, 0.35);
+      --grid-line:     rgba(16, 24, 40, 0.045);
+    }
+
+    /* ============================================================
+       2. Reset & temel
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-text-size-adjust: 100%;
+      color-scheme: dark;
+    }
+    :root[data-theme="light"] { color-scheme: light; }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body.no-scroll { overflow: hidden; }
+
+    h1, h2, h3, .font-display { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    /* ============================================================
+       3. Arka plan katmanları
+       ============================================================ */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: -2; pointer-events: none;
+      background:
+        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(0, 212, 170, .07) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 45% at 50% 108%, rgba(56, 120, 255, .05) 0%, transparent 55%),
+        var(--bg);
+    }
+    :root[data-theme="light"] .bg-layer {
+      background:
+        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(10, 127, 104, .07) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 45% at 50% 108%, rgba(56, 120, 255, .05) 0%, transparent 55%),
+        var(--bg);
+    }
+
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 56px 56px;
+    }
+
+    /* ============================================================
+       4. Yerleşim
+       ============================================================ */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 64px;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 16px 14px 48px; }
+    }
+
+    /* ---- Header ---- */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+    .brand h1 { font-size: 26px; font-weight: 700; letter-spacing: -.4px; line-height: 1.1; }
+    .brand .subtitle {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 1.6px; color: var(--muted); font-weight: 500;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 12px 5px 6px;
+    }
+    .theme-toggle-btn {
+      width: 28px; height: 28px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      border: none; border-radius: 50%;
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: var(--transition);
+    }
+    .theme-toggle-btn:hover { background: var(--bg-subtle); color: var(--fg); }
+    .theme-toggle-label { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+
+    /* ---- Sekmeler ---- */
+    .nav-tabs {
+      display: flex; gap: 4px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 4px; margin-bottom: 18px;
+    }
+    .nav-tab {
+      flex: 1; padding: 11px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .6px;
+      color: var(--muted); background: transparent;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      transition: var(--transition);
+    }
+    .nav-tab:hover { color: var(--fg); background: var(--bg-subtle); }
+    .nav-tab[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+
+    @media (max-width: 640px) { .nav-tab { padding: 10px 8px; font-size: 10px; letter-spacing: .3px; } }
+
+    /* ============================================================
+       5. Gün ızgarası (hafta seçici)
+       ============================================================ */
+    .week-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 10px;
+    }
+    .week-label { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--fg-dim); }
+    .week-nav { display: flex; gap: 6px; }
+    .icon-btn {
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--muted); cursor: pointer; transition: var(--transition);
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .days-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;
+    }
+
+    .day-card {
+      position: relative;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 8px 12px;
+      text-align: center; cursor: pointer;
+      font-family: inherit; color: inherit;
+      transition: var(--transition);
+    }
+    .day-card:hover { border-color: var(--border-strong); background: var(--card-hover); transform: translateY(-2px); }
+    .day-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+    .day-card.is-today .day-number { color: var(--accent); }
+    .day-card.is-today::after {
+      content: ''; position: absolute; inset-inline: 22%; bottom: 6px;
+      height: 2px; border-radius: 2px; background: var(--accent);
+    }
+
+    .day-name { font-family: 'Space Grotesk', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .day-number { font-size: 22px; font-weight: 700; line-height: 1.2; margin-top: 4px; }
+    .day-meta { font-size: 9px; color: var(--muted); margin-top: 2px; min-height: 12px; }
+    .day-meta.has-workout { color: var(--success); font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .days-grid { gap: 4px; }
+      .day-card { padding: 10px 4px 12px; border-radius: 10px; }
+      .day-name { font-size: 8px; letter-spacing: .4px; }
+      .day-number { font-size: 16px; }
+      .day-meta { font-size: 8px; }
+    }
+
+    /* ============================================================
+       6. Kart / panel
+       ============================================================ */
+    .panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px;
+    }
+    @media (max-width: 640px) { .panel { padding: 16px; } }
+
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .section-title { font-size: 17px; font-weight: 600; }
+    .section-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ============================================================
+       7. Program seçici
+       ============================================================ */
+    .program-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .program-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; background: var(--bg-subtle);
+      border: 1px solid var(--border); border-radius: 999px;
+      font-family: inherit; font-size: 11px; font-weight: 500; color: var(--fg-dim);
+      cursor: pointer; transition: var(--transition);
+    }
+    .program-chip:hover { border-color: var(--border-strong); color: var(--fg); }
+    .program-chip[aria-pressed="true"] {
+      color: var(--fg); border-color: var(--chip-color, var(--accent));
+      background: var(--chip-bg, var(--accent-soft));
+    }
+    .program-chip .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--chip-color, var(--muted)); flex: none; }
+
+    /* ============================================================
+       8. Egzersiz kartı
+       ============================================================ */
+    .exercise-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      animation: rise .25s ease both;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .exercise-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .exercise-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .exercise-name { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 9px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .badge-program { background: var(--badge-bg, var(--accent-soft)); color: var(--badge-fg, var(--accent)); border-color: var(--badge-bg, var(--accent-soft)); }
+    .badge-pr { background: rgba(255, 176, 32, .14); color: #ffb020; border-color: rgba(255, 176, 32, .3); }
+    :root[data-theme="light"] .badge-pr { background: rgba(214, 138, 0, .12); color: #b26a00; border-color: rgba(214, 138, 0, .28); }
+
+    .exercise-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+    .ex-stat { text-align: right; }
+    .ex-stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: var(--fg); }
+    .ex-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+
+    /* ---- Set listesi ---- */
+    .sets-head, .set-row {
+      display: grid;
+      grid-template-columns: 42px 1fr 1fr 74px 34px;
+      gap: 8px; align-items: center;
+    }
+    .sets-head {
+      font-size: 9px; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); padding: 0 2px 6px;
+    }
+    .set-row { margin-bottom: 6px; }
+    .set-row:last-of-type { margin-bottom: 0; }
+
+    .set-index {
+      font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-align: center;
+    }
+    .set-row.is-pr .set-index { color: #ffb020; }
+
+    .set-input {
+      width: 100%; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 8px 10px; font-family: inherit; font-size: 13px; color: var(--fg);
+      transition: var(--transition);
+    }
+    .set-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .set-input::-webkit-outer-spin-button, .set-input::-webkit-inner-spin-button { opacity: .4; }
+    .set-row.is-pr .set-input { border-color: rgba(255, 176, 32, .5); }
+
+    .set-volume { font-size: 11px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+    .set-row.is-pr .set-volume { color: #ffb020; }
+
+    .row-del {
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm);
+      color: var(--muted); cursor: pointer; transition: var(--transition);
+    }
+    .row-del:hover { color: var(--danger); background: rgba(244, 82, 106, .12); border-color: rgba(244, 82, 106, .3); }
+
+    @media (max-width: 560px) {
+      .sets-head { display: none; }
+      .set-row {
+        grid-template-columns: 30px 1fr 1fr 30px;
+        grid-template-areas: 'idx w r del' 'vol vol vol vol';
+        row-gap: 2px;
+      }
+      .set-row .set-index { grid-area: idx; }
+      .set-row .set-input.weight { grid-area: w; }
+      .set-row .set-input.reps { grid-area: r; }
+      .set-row .set-volume { grid-area: vol; text-align: left; padding-left: 38px; }
+      .set-row .row-del { grid-area: del; }
+      .set-input::placeholder { font-size: 10px; }
+    }
+
+    /* ---- Set ekleme ---- */
+    .add-set-btn {
+      width: 100%; margin-top: 10px; padding: 9px;
+      background: transparent; border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm); color: var(--muted);
+      font-family: inherit; font-size: 11px; font-weight: 500; cursor: pointer;
+      transition: var(--transition);
+    }
+    .add-set-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+    /* ---- İlerleme çubuğu ---- */
+    .progress-track {
+      width: 100%; height: 6px; background: var(--border);
+      border-radius: 999px; overflow: hidden; margin-top: 12px;
+    }
+    .progress-fill {
+      height: 100%; width: 0%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--success), var(--accent));
+      transition: width .35s ease;
+    }
+
+    /* ============================================================
+       9. Butonlar
+       ============================================================ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 18px; border: 1px solid transparent; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: var(--transition); white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: var(--accent-fg); }
+    .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-secondary { background: var(--card); color: var(--fg); border-color: var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .btn-ghost { background: transparent; color: var(--muted); }
+    .btn-ghost:hover { color: var(--fg); background: var(--bg-subtle); }
+    .btn-danger { background: rgba(244, 82, 106, .12); color: var(--danger); border-color: rgba(244, 82, 106, .28); }
+    .btn-danger:hover { background: rgba(244, 82, 106, .22); }
+    .btn-sm { padding: 6px 11px; font-size: 11px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* ============================================================
+       10. Boş durum
+       ============================================================ */
+    .empty-state { text-align: center; padding: 44px 20px; color: var(--muted); }
+    .empty-state svg { width: 42px; height: 42px; margin: 0 auto 12px; opacity: .45; }
+    .empty-state h3 { font-size: 15px; margin-bottom: 4px; color: var(--fg-dim); }
+    .empty-state p { font-size: 12px; max-width: 340px; margin: 0 auto 16px; }
+
+    /* ============================================================
+       11. İstatistik kartları
+       ============================================================ */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 18px;
+    }
+    .stat-card {
+      background: var(--bg-subtle); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+    }
+    .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--fg); line-height: 1.15; font-variant-numeric: tabular-nums; }
+    .stat-value .unit { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+    .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 4px; }
+    .stat-card.is-accent .stat-value { color: var(--accent); }
+
+    /* ============================================================
+       12. Hafta / Ay görünümleri
+       ============================================================ */
+    .week-summary { display: flex; flex-direction: column; gap: 10px; }
+    .week-summary.is-prev { opacity: .82; }
+    .week-summary.is-prev .summary-row:hover { opacity: 1; }
+    .summary-row {
+      display: grid; grid-template-columns: 92px 1fr 84px;
+      gap: 12px; align-items: center;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-subtle); border: 1px solid transparent;
+    }
+    .summary-row.is-selected { border-color: var(--accent); background: var(--accent-soft); }
+    .summary-day { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; }
+    .summary-day small { display: block; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; color: var(--muted); }
+    .bar-track { height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--success)); border-radius: 999px; transition: width .4s ease; }
+    .summary-value { font-size: 12px; text-align: right; color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+    .summary-value small { display: block; font-size: 9px; color: var(--muted); }
+
+    @media (max-width: 560px) {
+      .summary-row { grid-template-columns: 74px 1fr 62px; gap: 8px; padding: 9px 10px; }
+      .summary-day { font-size: 11px; }
+    }
+
+    /* ---- Ay takvimi ---- */
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-head {
+      text-align: center; font-size: 9px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding-bottom: 4px;
+    }
+    .cal-cell {
+      position: relative; min-height: 66px; padding: 7px;
+      background: var(--bg-subtle); border: 1px solid transparent;
+      border-radius: var(--radius-sm); text-align: left;
+      font-family: inherit; color: inherit; cursor: pointer;
+      transition: var(--transition);
+    }
+    .cal-cell:hover { border-color: var(--border-strong); }
+    .cal-cell.is-outside { opacity: .35; }
+    .cal-cell.is-today .cal-num { color: var(--accent); font-weight: 700; }
+    .cal-cell[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+    .cal-num { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 500; }
+    .cal-vol { font-size: 9px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .cal-cell.has-workout::before {
+      content: ''; position: absolute; top: 8px; right: 8px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    }
+
+    @media (max-width: 560px) {
+      .cal-cell { min-height: 52px; padding: 5px; }
+      .cal-vol { font-size: 8px; }
+    }
+
+    /* ---- Rekor listesi ---- */
+    .pr-list { display: flex; flex-direction: column; gap: 8px; }
+    .pr-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 11px 14px; background: var(--bg-subtle);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+    }
+    .pr-name { font-size: 13px; font-weight: 500; }
+    .pr-date { font-size: 10px; color: var(--muted); }
+    .pr-weight { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: #ffb020; white-space: nowrap; }
+    :root[data-theme="light"] .pr-weight { color: #b26a00; }
+
+    /* ============================================================
+       13. Modal
+       ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .72); backdrop-filter: blur(5px);
+      opacity: 0; visibility: hidden; transition: var(--transition);
+    }
+    .modal-overlay.is-open { opacity: 1; visibility: visible; }
+    .modal-content {
+      width: 100%; max-width: 420px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow);
+      transform: scale(.94) translateY(10px); transition: var(--transition);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-overlay.is-open .modal-content { transform: none; }
+    .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .modal-description { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+    .modal-input {
+      width: 100%; padding: 11px 14px;
+      background: var(--bg-subtle); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--fg);
+      transition: var(--transition);
+    }
+    .modal-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .modal-input::placeholder { color: var(--muted); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 6px; }
+
+    .suggestion-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .suggestion-chip {
+      padding: 7px 11px; background: var(--bg-subtle);
+      border: 1px solid var(--border); border-radius: 999px;
+      font-family: inherit; font-size: 11px; color: var(--fg-dim);
+      cursor: pointer; transition: var(--transition);
+    }
+    .suggestion-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .suggestion-chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+    /* ============================================================
+       14. Bildirim (toast)
+       ============================================================ */
+    .toast-stack {
+      position: fixed; bottom: 18px; right: 18px; z-index: 300;
+      display: flex; flex-direction: column; gap: 8px;
+      max-width: min(340px, calc(100vw - 36px));
+      pointer-events: none;
+    }
+    .toast { pointer-events: auto; }
+    .toast {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 11px 13px; border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      font-size: 12px; color: var(--fg);
+      animation: slide-in .22s ease both;
+    }
+    .toast.is-success { border-left-color: var(--success); }
+    .toast.is-error   { border-left-color: var(--danger); }
+    .toast.is-warning { border-left-color: var(--warning); }
+    .toast.is-leaving { animation: slide-out .18s ease both; }
+    .toast-msg { flex: 1; }
+    .toast-close {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 15px; line-height: 1; padding: 0 2px;
+    }
+    .toast-close:hover { color: var(--fg); }
+
+    @keyframes slide-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+    @keyframes slide-out { to { opacity: 0; transform: translateX(16px); } }
+
+    /* ============================================================
+       15. Ay hedef kartı
+       ============================================================ */
+    .goal-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px; margin-top: 16px;
+    }
+    .goal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .goal-title { font-size: 13px; font-weight: 600; }
+    .goal-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .goal-values { display: flex; align-items: baseline; gap: 8px; font-family: 'Space Grotesk', sans-serif; }
+    .goal-current { font-size: 24px; font-weight: 700; color: var(--accent); }
+    .goal-target { font-size: 13px; color: var(--muted); }
+
+    /* ============================================================
+       16. Geçen hafta / progresif artış paneli
+       ============================================================ */
+    .compare-panel {
+      margin-top: 18px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .compare-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .compare-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+    }
+    .compare-title svg { width: 15px; height: 15px; color: var(--accent); flex: none; }
+    .compare-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .compare-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      margin-bottom: 7px;
+    }
+    .compare-row:last-of-type { margin-bottom: 0; }
+    .compare-row.status-new    { border-left: 3px solid var(--accent); }
+    .compare-row.status-behind { border-left: 3px solid var(--warning); }
+    .compare-row.status-ahead  { border-left: 3px solid var(--success); }
+    .compare-row.status-same   { border-left: 3px solid var(--border-strong); }
+    .compare-row.status-extra  { border-left: 3px solid var(--muted); }
+
+    .compare-info { flex: 1; min-width: 150px; }
+    .compare-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .compare-detail { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .compare-detail b { color: var(--fg-dim); font-weight: 600; }
+    .compare-target { color: var(--accent); font-weight: 600; }
+
+    .status-tag {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 9px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .tag-new    { background: var(--accent-soft); color: var(--accent); }
+    .tag-behind { background: rgba(255, 107, 53, .14); color: var(--warning); }
+    .tag-ahead  { background: rgba(0, 212, 170, .14); color: var(--success); }
+    .tag-same   { background: var(--bg-subtle); color: var(--muted); }
+    .tag-extra  { background: var(--bg-subtle); color: var(--muted); }
+    :root[data-theme="light"] .tag-behind { background: rgba(194, 65, 12, .12); color: var(--warning); }
+    :root[data-theme="light"] .tag-ahead  { background: rgba(10, 127, 104, .12); color: var(--success); }
+
+    .compare-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ---- Progresif artış kutusu ---- */
+    .progression-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 12px;
+    }
+    .progression-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .progression-title { font-size: 12px; font-weight: 600; color: var(--fg-dim); }
+    .progression-rule { font-size: 10px; color: var(--muted); }
+
+    .progression-list { display: flex; flex-direction: column; gap: 6px; }
+    .progression-item {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      padding: 8px 10px; background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+    }
+    .progression-name { font-size: 12px; font-weight: 500; }
+    .progression-values {
+      font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+    }
+    .progression-arrow { color: var(--accent); font-weight: 700; }
+    .progression-new {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      color: var(--accent); font-size: 12px;
+    }
+    .progression-gain {
+      font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px;
+      color: var(--accent); background: var(--accent-soft);
+      padding: 2px 7px; border-radius: 999px;
+    }
+
+    /* ---- Hafta seçici (geçen haftayı görüntüle) ---- */
+    .week-picker {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .week-picker-label { font-size: 11px; color: var(--muted); flex: none; }
+    .week-picker-days { display: flex; gap: 6px; flex-wrap: wrap; }
+    .week-day-btn {
+      padding: 7px 12px; background: var(--card);
+      border: 1px solid var(--border); border-radius: 999px;
+      font-family: inherit; font-size: 11px; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: var(--transition);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .week-day-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .week-day-btn[aria-pressed="true"] {
+      border-color: var(--accent); color: var(--accent);
+      background: var(--accent-soft); font-weight: 700;
+    }
+    .week-day-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+    .week-day-btn .dot.empty { background: var(--border-strong); }
+
+    @media (max-width: 560px) {
+      .compare-row { flex-direction: column; align-items: stretch; }
+      .compare-actions .btn { flex: 1; }
+    }
+
+    /* ============================================================
+       17. Erişilebilirlik & hareket azaltma
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Mobilde bildirimler tam genişlikte, altta */
+    @media (max-width: 640px) {
+      .toast-stack {
+        bottom: 14px; right: 14px; left: 14px;
+        max-width: none;
+      }
+    }
+
+    @media print {
+      .header-actions, .nav-tabs, .week-bar, .btn, .add-set-btn, .row-del { display: none !important; }
+      body { background: #fff; color: #000; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-layer" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <h1>Overload</h1>
+        <p class="subtitle">Progressive Overload Tracker</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Temayı değiştir">
+          <span class="theme-toggle-btn" id="themeBtn" aria-hidden="true">🌙</span>
+          <span class="theme-toggle-label" id="themeText">Karanlık</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="nav-tabs" role="tablist" aria-label="Görünüm">
+      <button class="nav-tab" role="tab" data-view="gun"   id="tab-gun"   aria-controls="viewPanel" aria-selected="true">Gün</button>
+      <button class="nav-tab" role="tab" data-view="hafta" id="tab-hafta" aria-controls="viewPanel" aria-selected="false">Hafta</button>
+      <button class="nav-tab" role="tab" data-view="ay"    id="tab-ay"    aria-controls="viewPanel" aria-selected="false">Ay</button>
+    </div>
+
+    <div class="week-bar">
+      <span class="week-label" id="weekLabel">—</span>
+      <div class="week-nav">
+        <button class="icon-btn" id="prevWeek" type="button" aria-label="Önceki hafta">‹</button>
+        <button class="icon-btn" id="nextWeek" type="button" aria-label="Sonraki hafta">›</button>
+      </div>
+    </div>
+
+    <div class="days-grid" id="daysGrid" role="group" aria-label="Hafta günleri"></div>
+
+    <main class="panel" id="viewPanel" role="tabpanel" aria-labelledby="tab-gun" tabindex="-1"></main>
+
+    <section class="goal-card" id="goalCard" aria-label="Aylık hedef"></section>
+  </div>
+
+  <div class="toast-stack" id="toastStack" role="status" aria-live="polite"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ============================================================
+       1. Sabitler
+       ============================================================ */
+    const STORAGE_KEY = 'overload-data-v2';
+    const SCHEMA_VERSION = 2;
+
+    const DAY_NAMES = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const DAY_SHORT = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    /** Pazartesi ile başlayan hafta sırası */
+    const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+    const PROGRAMS = {
+      push:  { name: 'Push',        emoji: '🏋️', color: '#ff6b35', exercises: ['Bench Press', 'Incline Press', 'Triceps Pushdown', 'Lateral Raise'] },
+      pull:  { name: 'Pull',        emoji: '🎣', color: '#38bdf8', exercises: ['Lat Pulldown', 'Barbell Row', 'Face Pull', 'Biceps Curl'] },
+      legs:  { name: 'Bacak',       emoji: '🦵', color: '#10b981', exercises: ['Squat', 'Leg Press', 'Romanian Deadlift', 'Lunges'] },
+      upper: { name: 'Üst Vücut',   emoji: '💪', color: '#f472b6', exercises: ['Overhead Press', 'Pull-ups', 'Dips', 'Shrugs'] },
+      lower: { name: 'Alt Vücut',   emoji: '🏋️', color: '#6366f1', exercises: ['Leg Curl', 'Calf Raise', 'Plank', 'Russian Twist'] },
+      full:  { name: 'Tüm Vücut',   emoji: '🔥', color: '#f97316', exercises: ['Deadlift', 'Clean & Press', 'Thruster', 'Burpees'] },
+      rest:  { name: 'Dinlenme',    emoji: '😴', color: '#6b7280', exercises: [] },
+      custom:{ name: 'Özel',        emoji: '✏️', color: '#8b8b9e', exercises: [] }
+    };
+
+    /* ============================================================
+       2. State
+       ============================================================ */
+    const state = {
+      version: SCHEMA_VERSION,
+      exercises: [],      // { id, name, program, date (YYYY-MM-DD), sets: [{ id, weight, reps }] }
+      monthlyGoal: 5000,  // kg·tekrar
+      theme: 'dark',
+      view: 'gun',
+      selectedDate: todayISO(),
+      activeProgram: null,
+      copySourceDate: null,   // kopyalanacak kaynak gün (geçen hafta seçici)
+      /* Progresif artış kuralları */
+      progression: {
+        weightStep: 2.5,   // haftalık kilo artışı (üst vücut)
+        weightStepLower: 5,// alt vücut için kilo artışı
+        repStep: 1        // kilo artırılamıyorsa tekrar artışı
+      }
+    };
+
+    /* ============================================================
+       3. Yardımcılar
+       ============================================================ */
+    function uid(prefix) {
+      return (prefix || 'id') + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function toISO(date) {
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    }
+
+    function todayISO() { return toISO(new Date()); }
+
+    function parseISO(iso) {
+      const parts = String(iso).split('-').map(Number);
+      return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+    }
+
+    /** Pazartesi başlangıçlı haftanın ilk günü */
+    function startOfWeek(date) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dow = (d.getDay() + 6) % 7; // Pzt=0 ... Paz=6
+      d.setDate(d.getDate() - dow);
+      return d;
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function weekDates(start) {
+      const out = [];
+      for (let i = 0; i < 7; i++) out.push(addDays(start, i));
+      return out;
+    }
+
+    /** Seçili tarihin bulunduğu haftanın başlangıcı ve bitişi (ISO) */
+    function weekBounds(dateISO) {
+      const start = startOfWeek(parseISO(dateISO));
+      const dates = weekDates(start);
+      return { start: toISO(dates[0]), end: toISO(dates[6]), dates: dates };
+    }
+
+    /** Seçili günün bir önceki haftadaki karşılığı (aynı gün) */
+    function sameDayPreviousWeek(dateISO) {
+      return toISO(addDays(parseISO(dateISO), -7));
+    }
+
+    function sameMonth(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+    }
+
+    const MONTH_NAMES = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                         'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+    function formatDateLong(iso) {
+      const d = parseISO(iso);
+      return d.getDate() + ' ' + MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function formatDateShort(iso) {
+      const d = parseISO(iso);
+      return pad(d.getDate()) + '.' + pad(d.getMonth() + 1);
+    }
+
+    function num(v) {
+      const n = typeof v === 'number' ? v : parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    /** HTML kaçışı — kullanıcı girdisi innerHTML'e girmeden önce */
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&#38;')
+        .replace(/</g, '&#60;')
+        .replace(/>/g, '&#62;')
+        .replace(/"/g, '&#34;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function hexToRgba(hex, alpha) {
+      const h = hex.replace('#', '');
+      const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+      const r = parseInt(full.slice(0, 2), 16) || 0;
+      const g = parseInt(full.slice(2, 4), 16) || 0;
+      const b = parseInt(full.slice(4, 6), 16) || 0;
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    }
+
+    function formatKg(n) {
+      const v = num(n);
+      return (Math.round(v * 10) / 10).toLocaleString('tr-TR');
+    }
+
+    /* ============================================================
+       4. Kalıcı depolama
+       ============================================================ */
+    function loadState() {
+      let raw = null;
+      try {
+        raw = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {
+        console.warn('Veri okunamadı (localStorage kapalı olabilir):', e);
+        return;
+      }
+      if (!raw) return;
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        console.warn('Bozuk kayıt bulundu, varsayılanlara dönülüyor:', e);
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+        return;
+      }
+      if (!data || typeof data !== 'object') return;
+
+      if (Array.isArray(data.exercises)) {
+        state.exercises = data.exercises
+          .filter(e => e && typeof e.name === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.date))
+          .map(normalizeExercise);
+      }
+      if (Number.isFinite(data.monthlyGoal) && data.monthlyGoal > 0) state.monthlyGoal = data.monthlyGoal;
+      if (data.progression && typeof data.progression === 'object') {
+        const p = data.progression;
+        if (Number.isFinite(p.weightStep) && p.weightStep >= 0) state.progression.weightStep = p.weightStep;
+        if (Number.isFinite(p.weightStepLower) && p.weightStepLower >= 0) state.progression.weightStepLower = p.weightStepLower;
+        if (Number.isFinite(p.repStep) && p.repStep >= 0) state.progression.repStep = p.repStep;
+      }
+      if (data.theme === 'light' || data.theme === 'dark') state.theme = data.theme;
+      if (typeof data.selectedDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.selectedDate)) {
+        state.selectedDate = data.selectedDate;
+      }
+      if (data.view === 'gun' || data.view === 'hafta' || data.view === 'ay') state.view = data.view;
+    }
+
+    function normalizeExercise(e) {
+      const sets = Array.isArray(e.sets) ? e.sets.map(s => ({
+        id: s && s.id ? s.id : uid('set'),
+        weight: num(s && s.weight),
+        reps: num(s && s.reps)
+      })) : [];
+      return {
+        id: e.id || uid('ex'),
+        name: String(e.name),
+        program: (e.program && PROGRAMS[e.program]) ? e.program : 'custom',
+        date: e.date,
+        sets: sets
+      };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          version: SCHEMA_VERSION,
+          exercises: state.exercises,
+          monthlyGoal: state.monthlyGoal,
+          progression: state.progression,
+          theme: state.theme,
+          selectedDate: state.selectedDate,
+          view: state.view
+        }));
+      } catch (e) {
+        console.warn('Kayıt yapılamadı:', e);
+        toast('Veriler kaydedilemedi (tarayıcı depolaması dolu olabilir).', 'error');
+      }
+    }
+
+    /* ============================================================
+       5. Hesaplamalar
+       ============================================================ */
+    function exercisesOn(dateISO) {
+      return state.exercises.filter(e => e.date === dateISO);
+    }
+
+    function setVolume(set) {
+      return num(set.weight) * num(set.reps);
+    }
+
+    function exerciseVolume(ex) {
+      return ex.sets.reduce((sum, s) => sum + setVolume(s), 0);
+    }
+
+    function exerciseBest(ex) {
+      return ex.sets.reduce((max, s) => Math.max(max, num(s.weight)), 0);
+    }
+
+    function volumeOn(dateISO) {
+      return exercisesOn(dateISO).reduce((sum, ex) => sum + exerciseVolume(ex), 0);
+    }
+
+    function setsOn(dateISO) {
+      return exercisesOn(dateISO).reduce((sum, ex) => sum + ex.sets.length, 0);
+    }
+
+    function volumeInRange(fromISO, toISO) {
+      return state.exercises.reduce((sum, ex) => {
+        if (ex.date >= fromISO && ex.date <= toISO) return sum + exerciseVolume(ex);
+        return sum;
+      }, 0);
+    }
+
+    function workoutsInRange(fromISO, toISO) {
+      const dates = new Set();
+      state.exercises.forEach(ex => {
+        if (ex.date >= fromISO && ex.date <= toISO) dates.add(ex.date);
+      });
+      return dates.size;
+    }
+
+    function monthRange(date) {
+      const from = new Date(date.getFullYear(), date.getMonth(), 1);
+      const to = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      return { from: toISO(from), to: toISO(to) };
+    }
+
+    /* ============================================================
+       Progresif artış hesaplama
+       ============================================================ */
+
+    /** Alt vücut hareketleri mi? (bunlarda daha hızlı kilo artışı uygulanır) */
+    const LOWER_BODY_HINTS = ['squat', 'leg', 'deadlift', 'lunge', 'hip', 'thrust', 'calf', 'kaldirma', 'bacak', 'squat'];
+
+    function isLowerBody(name) {
+      const n = String(name).toLowerCase();
+      return LOWER_BODY_HINTS.some(function (h) { return n.indexOf(h) !== -1; });
+    }
+
+    /**
+     * Bir hareket için hedef setleri hesaplar.
+     * Kural: geçen haftanın son setinin kilosuna göre ağırlık artır,
+     *          artırılamıyorsa (çok yüksek ağırlık) tekrar artır.
+     * Returns: { sets: [{weight, reps, prevWeight, prevReps, gain}], mode: 'weight'|'reps'|'none' }
+     */
+    function progressionTargets(prevExercise) {
+      if (!prevExercise || !prevExercise.sets.length) {
+        return { sets: [], mode: 'none' };
+      }
+
+      const step = isLowerBody(prevExercise.name) ? state.progression.weightStepLower : state.progression.weightStep;
+      const repStep = state.progression.repStep;
+      const prevSets = prevExercise.sets;
+
+      /* Ağırlık artırılabilir mi? Son setin ağırlığına göre bak */
+      const lastSet = prevSets[prevSets.length - 1];
+      const lastWeight = num(lastSet.weight);
+      const lastReps = num(lastSet.reps);
+
+      /* Tüm setlerdeki en yüksek ağırlık */
+      const topWeight = prevSets.reduce(function (m, s) { return Math.max(m, num(s.weight)); }, 0);
+
+      /* Kilo artıramıyorsak tekrar artıracağız */
+      const canAddWeight = topWeight > 0;
+      const mode = canAddWeight ? 'weight' : 'reps';
+
+      const sets = prevSets.map(function (s) {
+        const pw = num(s.weight);
+        const pr = num(s.reps);
+        let tw = pw;
+        let tr = pr;
+
+        if (canAddWeight) {
+          tw = pw + step;
+        } else {
+          tr = pr + repStep;
+        }
+        return {
+          weight: tw,
+          reps: tr,
+          prevWeight: pw,
+          prevReps: pr,
+          gain: canAddWeight
+            ? { type: 'weight', amount: step }
+            : { type: 'reps', amount: repStep }
+        };
+      });
+
+      /* Son sette tekrar artışı da öner (ağırlık + tekrar birlikte) */
+      if (canAddWeight && mode === 'weight' && lastReps > 0 && lastReps < 12) {
+        /* Kilo artarken son setin tekrarı da 1 artırılabilir */
+        sets[sets.length - 1].reps = lastReps + repStep;
+        sets[sets.length - 1].gain = { type: 'both', weight: step, reps: repStep };
+      }
+
+      return { sets: sets, mode: mode };
+    }
+
+    /**
+     * İki günün hareketlerini karşılaştırır.
+     * Returns: { name, status, prev, current, targets }
+     * status: 'new' | 'same' | 'behind' | 'ahead' | 'done'
+     */
+    function compareDay(prevDateISO, currDateISO) {
+      const prev = exercisesOn(prevDateISO);
+      const curr = exercisesOn(currDateISO);
+      const rows = [];
+
+      prev.forEach(function (p) {
+        const key = p.name.toLowerCase();
+        const c = curr.find(function (x) { return x.name.toLowerCase() === key; }) || null;
+        const targets = progressionTargets(p);
+
+        let status;
+        if (!c) {
+          status = 'new';
+        } else {
+          const currBest = exerciseBest(c);
+          const prevBest = exerciseBest(p);
+          const currVol = exerciseVolume(c);
+          const prevVol = exerciseVolume(p);
+          if (currVol <= 0) status = 'new';
+          else if (currBest > prevBest) status = 'ahead';
+          else if (currBest < prevBest) status = 'behind';
+          else if (currVol >= prevVol) status = 'same';
+          else status = 'behind';
+        }
+
+        rows.push({ name: p.name, program: p.program, prev: p, current: c, targets: targets, status: status });
+      });
+
+      /* Yeni günde olup geçen haftada olmayan hareketler */
+      curr.forEach(function (c) {
+        const key = c.name.toLowerCase();
+        const exists = prev.some(function (x) { return x.name.toLowerCase() === key; });
+        if (!exists) {
+          rows.push({ name: c.name, program: c.program, prev: null, current: c, targets: { sets: [], mode: 'none' }, status: 'extra' });
+        }
+      });
+
+      return rows;
+    }
+
+    /** Hareket adına göre tüm zamanlar rekor ağırlık (PR) */
+    function personalRecords() {
+      const map = new Map();
+      state.exercises.forEach(ex => {
+        const key = ex.name.toLowerCase();
+        const best = exerciseBest(ex);
+        if (best <= 0) return;
+        const current = map.get(key);
+        if (!current || best > current.weight) {
+          map.set(key, { name: ex.name, weight: best, date: ex.date });
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => b.weight - a.weight);
+    }
+
+    /**
+     * Her hareket adı için güncel PR tutan seti belirler.
+     * Eşitlik durumunda en eski kayıt (tarih → egzersiz → set sırası) kazanır,
+     * böylece iki set aynı ağırlıktaysa rekor rozeti tek yerde kalır.
+     */
+    function currentPRSetIds() {
+      const groups = new Map();
+      state.exercises.forEach(function (ex, exIdx) {
+        ex.sets.forEach(function (s, setIdx) {
+          const w = num(s.weight);
+          if (w <= 0) return;
+          const key = ex.name.toLowerCase();
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push({ id: s.id, weight: w, date: ex.date, exIdx: exIdx, setIdx: setIdx });
+        });
+      });
+
+      const ids = new Set();
+      groups.forEach(function (list) {
+        let best = list[0];
+        list.forEach(function (c) {
+          const newer = c.weight > best.weight ||
+            (c.weight === best.weight && (
+              c.date < best.date ||
+              (c.date === best.date && (
+                c.exIdx < best.exIdx ||
+                (c.exIdx === best.exIdx && c.setIdx < best.setIdx)
+              ))
+            ));
+          if (newer) best = c;
+        });
+        ids.add(best.id);
+      });
+      return ids;
+    }
+
+    /** Tüm setlerin PR bayraklarını güncel duruma göre senkronlar */
+    function applyPRFlags() {
+      const ids = currentPRSetIds();
+      state.exercises.forEach(function (ex) {
+        ex.sets.forEach(function (s) {
+          s.isPR = ids.has(s.id);
+        });
+      });
+    }
+
+    /* ============================================================
+       6. Tema
+       ============================================================ */
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', state.theme);
+      const btn = document.getElementById('themeBtn');
+      const label = document.getElementById('themeText');
+      btn.textContent = state.theme === 'dark' ? '🌙' : '☀️';
+      label.textContent = state.theme === 'dark' ? 'Karanlık' : 'Aydınlık';
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+    }
+
+    /* ============================================================
+       7. Bildirimler (toast)
+       ============================================================ */
+    function toast(message, type) {
+      const stack = document.getElementById('toastStack');
+      const el = document.createElement('div');
+      el.className = 'toast is-' + (type || 'info');
+      el.innerHTML = '<span class="toast-msg">' + esc(message) + '</span>' +
+                     '<button class="toast-close" type="button" aria-label="Kapat">&times;</button>';
+      stack.appendChild(el);
+
+      /* Yeni bildirim en üste gelsin */
+      stack.insertBefore(el, stack.firstChild);
+
+      const close = function () {
+        if (el.classList.contains('is-leaving')) return;
+        el.classList.add('is-leaving');
+        setTimeout(() => el.remove(), 200);
+      };
+      el.querySelector('.toast-close').addEventListener('click', close);
+      setTimeout(close, 4200);
+    }
+
+    /* ============================================================
+       8. Modal altyapısı (odak tuzağı + Esc + overlay)
+       ============================================================ */
+    const modalStack = [];
+    let lastFocused = null;
+
+    function openModal(buildContent, onMount) {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = '<div class="modal-content" role="dialog" aria-modal="true"></div>';
+      const content = overlay.querySelector('.modal-content');
+      content.appendChild(buildContent());
+
+      document.body.appendChild(overlay);
+      document.body.classList.add('no-scroll');
+      lastFocused = document.activeElement;
+
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+
+      const onKeydown = function (e) {
+        if (e.key === 'Escape') { e.preventDefault(); closeModal(overlay); return; }
+        if (e.key === 'Tab') {
+          const focusables = content.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      };
+      overlay.addEventListener('keydown', onKeydown);
+      overlay.addEventListener('mousedown', function (e) {
+        if (e.target === overlay) closeModal(overlay);
+      });
+
+      modalStack.push(overlay);
+      if (onMount) onMount(content);
+      return overlay;
+    }
+
+    function closeModal(overlay) {
+      const idx = modalStack.indexOf(overlay);
+      if (idx === -1) return;
+      modalStack.splice(idx, 1);
+      overlay.classList.remove('is-open');
+      setTimeout(() => overlay.remove(), 200);
+      if (!modalStack.length) document.body.classList.remove('no-scroll');
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    }
+
+    /* ============================================================
+       9. Render — gün ızgarası
+       ============================================================ */
+    function renderDays() {
+      const grid = document.getElementById('daysGrid');
+      const weekStart = startOfWeek(parseISO(state.selectedDate));
+      const dates = weekDates(weekStart);
+      const today = todayISO();
+
+      const first = dates[0], last = dates[6];
+      document.getElementById('weekLabel').textContent =
+        formatDateShort(toISO(first)) + ' – ' + formatDateShort(toISO(last)) +
+        ' ' + parseISO(toISO(last)).getFullYear();
+
+      grid.innerHTML = dates.map(function (d) {
+        const iso = toISO(d);
+        const dow = d.getDay();
+        const vol = volumeOn(iso);
+        const selected = iso === state.selectedDate;
+        const isToday = iso === today;
+        const hasWorkout = exercisesOn(iso).length > 0;
+        return '<button type="button" class="day-card' + (isToday ? ' is-today' : '') + '" ' +
+               'data-date="' + iso + '" aria-pressed="' + (selected ? 'true' : 'false') + '" ' +
+               'aria-label="' + esc(DAY_NAMES[dow] + ' ' + d.getDate() + ' ' + MONTH_NAMES[d.getMonth()]) +
+               (hasWorkout ? ', antrenman var' : ', antrenman yok') + '">' +
+                 '<span class="day-name">' + DAY_SHORT[dow] + '</span>' +
+                 '<span class="day-number">' + d.getDate() + '</span>' +
+                 '<span class="day-meta' + (hasWorkout ? ' has-workout' : '') + '">' +
+                   (hasWorkout ? formatKg(vol) + ' kg' : '—') +
+                 '</span>' +
+               '</button>';
+      }).join('');
+    }
+
+    /* ============================================================
+       10. Render — görünüm yönlendirici
+       ============================================================ */
+    function renderView() {
+      const panel = document.getElementById('viewPanel');
+      document.querySelectorAll('.nav-tab').forEach(function (tab) {
+        tab.setAttribute('aria-selected', tab.dataset.view === state.view ? 'true' : 'false');
+      });
+      panel.setAttribute('aria-labelledby', 'tab-' + state.view);
+
+      if (state.view === 'gun') renderGunView(panel);
+      else if (state.view === 'hafta') renderWeekView(panel);
+      else renderMonthView(panel);
+    }
+
+    /* ---------- Gün görünümü ---------- */
+    function renderGunView(panel) {
+      const iso = state.selectedDate;
+      const date = parseISO(iso);
+      const exs = exercisesOn(iso);
+      const vol = volumeOn(iso);
+      const setCount = setsOn(iso);
+      const best = exs.reduce(function (m, ex) { return Math.max(m, exerciseBest(ex)); }, 0);
+
+      let html = '';
+
+      html += '<div class="section-head">' +
+                '<div>' +
+                  '<h2 class="section-title">' + esc(DAY_NAMES[date.getDay()]) + ' Antrenmanı</h2>' +
+                  '<p class="section-sub">' + esc(formatDateLong(iso)) + '</p>' +
+                '</div>' +
+              '</div>';
+
+      html += '<div class="stats-grid">' +
+                statCard(formatKg(vol), 'kg·tekrar', 'Hacim', true) +
+                statCard(setCount, '', 'Toplam Set', false) +
+                statCard(formatKg(best), 'kg', 'En Yüksek Set', false) +
+                statCard(exs.length, '', 'Hareket', false) +
+              '</div>';
+
+      if (exs.length === 0) {
+        html += '<div class="empty-state">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">' +
+                    '<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>' +
+                  '</svg>' +
+                  '<h3>Bu gün için kayıt yok</h3>' +
+                  '<p>Bir program seçip önerilen hareketleri otomatik ekleyebilir ya da kendi hareketini yazabilirsin.</p>' +
+                '</div>';
+        html += renderProgramSelector();
+      } else {
+        html += exs.map(function (ex, idx) { return renderExerciseCard(ex, idx); }).join('');
+      }
+
+      html += '<div class="btn-row" style="margin-top:18px">' +
+                '<button class="btn btn-primary" type="button" data-action="add-exercise">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">' +
+                    '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>' +
+                  '</svg> Hareket Ekle</button>' +
+                (exs.length ? '<button class="btn btn-secondary" type="button" data-action="add-from-program">Programdan Ekle</button>' : '') +
+              '</div>';
+
+      /* Geçen hafta karşılaştırması + kopyalama + artış hedefleri */
+      html += renderPreviousWeekPanel();
+
+      panel.innerHTML = html;
+    }
+
+    function statCard(value, unit, label, accent) {
+      return '<div class="stat-card' + (accent ? ' is-accent' : '') + '">' +
+               '<div class="stat-value">' + esc(value) + (unit ? '<span class="unit">' + esc(unit) + '</span>' : '') + '</div>' +
+               '<div class="stat-label">' + esc(label) + '</div>' +
+             '</div>';
+    }
+
+    /* ============================================================
+       Geçen hafta paneli — karşılaştırma + kopyalama + artış hedefleri
+       ============================================================ */
+    function renderPreviousWeekPanel() {
+      const currISO = state.selectedDate;
+      const prevISO = sameDayPreviousWeek(currISO);
+      /* Geçen haftanın gün aralığı (seçili haftanın bir hafta öncesi) */
+      const prevBounds = weekBounds(prevISO);
+
+      /* Önceki haftada hiç kayıt yoksa uyarı göster */
+      const prevWeekAny = volumeInRange(prevBounds.start, prevBounds.end);
+      const prevDayExs = exercisesOn(prevISO);
+
+      /* Kullanıcı geçen haftadan farklı bir gün seçtiyse onu kullan */
+      const srcISO = (state.copySourceDate && prevBounds.dates.some(function (d) {
+        return toISO(d) === state.copySourceDate;
+      })) ? state.copySourceDate : prevISO;
+
+      const rows = compareDay(srcISO, currISO);
+      const pending = rows.filter(function (r) { return r.status === 'new' || r.status === 'behind'; });
+
+      let html = '<section class="compare-panel" aria-label="Geçen hafta karşılaştırması">';
+
+      /* --- Başlık --- */
+      const srcExs = exercisesOn(srcISO);
+      const srcHasData = srcExs.length > 0;
+      html += '<div class="compare-head">' +
+                '<div>' +
+                  '<div class="compare-title">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+                      '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>' +
+                    '</svg> Geçen Hafta' +
+                  '</div>' +
+                  '<div class="compare-sub">' + esc(formatDateLong(srcISO)) + ' — ' +
+                    (!srcHasData ? 'bu günde kayıt yok' :
+                     pending.length ? pending.length + ' hareket bekliyor' : 'Tüm hareketler tamamlandı') +
+                  '</div>' +
+                '</div>' +
+                '<div class="compare-actions">' +
+                  (srcHasData ? '<button class="btn btn-sm btn-secondary" type="button" data-action="copy-week-plain">Aynısını Kopyala</button>' +
+                   '<button class="btn btn-sm btn-primary" type="button" data-action="copy-week-progression">Artışla Kopyala</button>' : '') +
+                '</div>' +
+              '</div>';
+
+      /* --- Önceki haftadaki gün seçici --- */
+      html += '<div class="week-picker">' +
+                '<span class="week-picker-label">Geçen haftanın günü:</span>' +
+                '<div class="week-picker-days">';
+      prevBounds.dates.forEach(function (d) {
+        const iso = toISO(d);
+        const exs = exercisesOn(iso);
+        const isTarget = iso === srcISO;
+        html += '<button type="button" class="week-day-btn" data-copy-date="' + iso + '" aria-pressed="' + (isTarget ? 'true' : 'false') + '">' +
+                  '<span class="dot' + (exs.length ? '' : ' empty') + '" aria-hidden="true"></span>' +
+                  esc(DAY_SHORT[d.getDay()]) + ' ' + d.getDate() +
+                '</button>';
+      });
+      html += '</div></div>';
+
+      /* --- Karşılaştırma satırları --- */
+      if (!rows.length) {
+        html += '<p class="compare-sub">Bu gün için geçen haftanın kaydı bulunmuyor.</p>';
+      } else {
+        html += '<div class="compare-list">';
+        rows.forEach(function (r) {
+          html += renderCompareRow(r, currISO, srcISO);
+        });
+        html += '</div>';
+      }
+
+      /* --- Progresif artış özeti --- */
+      html += renderProgressionBox(rows);
+
+      html += '</section>';
+      return html;
+    }
+
+    function renderCompareRow(r, currISO, prevISO) {
+      const statusLabel = {
+        'new': 'Yeni', 'behind': 'Eksik', 'ahead': 'Geçildi', 'same': 'Tamam', 'extra': 'Fazladan'
+      }[r.status] || '';
+
+      const prevSets = r.prev ? r.prev.sets : [];
+      const prevBest = r.prev ? exerciseBest(r.prev) : 0;
+      const currBest = r.current ? exerciseBest(r.current) : 0;
+      const currVol = r.current ? exerciseVolume(r.current) : 0;
+
+      let detail = '';
+      if (r.prev) {
+        const prevDetail = prevSets.map(function (s) {
+          return formatKg(s.weight) + '×' + formatKg(s.reps);
+        }).join(', ');
+        detail = '<b>Geçen hafta:</b> ' + esc(prevDetail || '—') +
+                 ' <span class="status-tag tag-' + r.status + '">' + statusLabel + '</span>';
+        if (r.current && currVol > 0) {
+          detail += '<br><b>Bu hafta:</b> ' + esc(formatKg(currBest) + ' kg en iyi · ' + formatKg(currVol) + ' kg·tekrar hacim');
+        }
+      } else {
+        detail = 'Bu gün sadece bulunan hareket — geçen hafta karşılığı yok' +
+                 ' <span class="status-tag tag-extra">Fazladan</span>';
+      }
+
+      /* Hedef artış metni */
+      let target = '';
+      if (r.targets.sets.length) {
+        const t = r.targets.sets[r.targets.sets.length - 1];
+        const gain = t.gain;
+        if (gain.type === 'weight') {
+          target = 'Hedef: <span class="compare-target">' + formatKg(t.weight) + ' kg × ' + formatKg(t.reps) +
+                   '</span> (+' + formatKg(gain.amount) + ' kg)';
+        } else if (gain.type === 'reps') {
+          target = 'Hedef: <span class="compare-target">' + formatKg(t.weight) + ' kg × ' + formatKg(t.reps) +
+                   '</span> (+' + formatKg(gain.amount) + ' tekrar)';
+        } else {
+          target = 'Hedef: <span class="compare-target">' + formatKg(t.weight) + ' kg × ' + formatKg(t.reps) + '</span> ' +
+                   '(+' + formatKg(gain.weight) + ' kg, +' + formatKg(gain.reps) + ' tekrar)';
+        }
+      }
+
+      /* Aksiyonlar */
+      let actions = '';
+      if (r.prev) {
+        const alreadyThere = r.current !== null;
+        actions += '<button class="btn btn-sm btn-secondary" type="button" data-action="copy-ex-plain" ' +
+                   'data-name="' + esc(r.name) + '" data-src="' + esc(prevISO) + '">Kopyala</button>';
+        actions += '<button class="btn btn-sm btn-primary" type="button" data-action="copy-ex-progression" ' +
+                   'data-name="' + esc(r.name) + '" data-src="' + esc(prevISO) + '"' +
+                   (alreadyThere ? ' disabled title="Bu hareket bu gün zaten var"' : '') + '>Artışla Ekle</button>';
+      }
+
+      return '<div class="compare-row status-' + r.status + '">' +
+               '<div class="compare-info">' +
+                 '<div class="compare-name">' + esc(r.name) + '</div>' +
+                 '<div class="compare-detail">' + detail + '</div>' +
+                 (target ? '<div class="compare-detail" style="margin-top:4px">' + target + '</div>' : '') +
+               '</div>' +
+               '<div class="compare-actions">' + actions + '</div>' +
+             '</div>';
+    }
+
+    /** Artış kurallarını ve her hareket için hedef değerleri gösteren kutu */
+    function renderProgressionBox(rows) {
+      const withTargets = rows.filter(function (r) { return r.targets.sets.length; });
+
+      const upper = state.progression.weightStep;
+      const lower = state.progression.weightStepLower;
+
+      let html = '<div class="progression-box">' +
+        '<div class="progression-head">' +
+          '<div class="progression-title">Progresif Artış Hedefleri</div>' +
+          '<div class="progression-rule" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+            '<span>Üst vücut +' + formatKg(upper) + ' kg · Alt vücut +' + formatKg(lower) + ' kg · Tekrar +' + formatKg(state.progression.repStep) + '</span>' +
+            '<button class="btn btn-sm btn-ghost" type="button" data-action="edit-progression">Kuralı Düzenle</button>' +
+          '</div>' +
+        '</div>';
+
+      if (!withTargets.length) {
+        html += '<p class="compare-sub" style="margin:0">Hedef görmek için geçen haftanın bir gününü seç.</p></div>';
+        return html;
+      }
+
+      html += '<div class="progression-list">';
+
+      withTargets.forEach(function (r) {
+        const last = r.targets.sets[r.targets.sets.length - 1];
+        let gainLabel = '';
+        if (last.gain.type === 'weight') gainLabel = '+' + formatKg(last.gain.amount) + ' kg';
+        else if (last.gain.type === 'reps') gainLabel = '+' + formatKg(last.gain.amount) + ' tekrar';
+        else gainLabel = '+' + formatKg(last.gain.weight) + ' kg / +' + formatKg(last.gain.reps) + ' tekrar';
+
+        html += '<div class="progression-item">' +
+                  '<span class="progression-name">' + esc(r.name) + '</span>' +
+                  '<span class="progression-values">' +
+                    '<span>' + formatKg(last.prevWeight) + ' kg × ' + formatKg(last.prevReps) + '</span>' +
+                    '<span class="progression-arrow">→</span>' +
+                    '<span class="progression-new">' + formatKg(last.weight) + ' kg × ' + formatKg(last.reps) + '</span>' +
+                    '<span class="progression-gain">' + esc(gainLabel) + '</span>' +
+                  '</span>' +
+                '</div>';
+      });
+
+      html += '</div></div>';
+      return html;
+    }
+
+    function renderExerciseCard(ex, idx) {
+      const prog = PROGRAMS[ex.program] || PROGRAMS.custom;
+      const best = exerciseBest(ex);
+      const lastSet = ex.sets[ex.sets.length - 1];
+      const lastWeight = lastSet ? num(lastSet.weight) : 0;
+      const progress = best > 0 ? Math.min(100, (lastWeight / best) * 100) : 0;
+      const volume = exerciseVolume(ex);
+      const hasPR = ex.sets.some(function (s) { return !!s.isPR && num(s.weight) > 0; });
+
+      let html = '<article class="exercise-card" data-exercise-id="' + esc(ex.id) + '">';
+      html += '<div class="exercise-head">' +
+                '<div class="exercise-title">' +
+                  '<span class="exercise-name">' + esc(ex.name) + '</span>' +
+                  '<span class="badge badge-program" style="--badge-bg:' + hexToRgba(prog.color, .16) + ';--badge-fg:' + prog.color + '">' +
+                    prog.emoji + ' ' + esc(prog.name) +
+                  '</span>' +
+                  (hasPR ? '<span class="badge badge-pr">🏆 Rekor</span>' : '') +
+                '</div>' +
+                '<div class="exercise-stats">' +
+                  '<div class="ex-stat"><div class="ex-stat-value">' + formatKg(volume) + '</div><div class="ex-stat-label">Hacim</div></div>' +
+                  '<div class="ex-stat"><div class="ex-stat-value">' + formatKg(best) + '</div><div class="ex-stat-label">En İyi</div></div>' +
+                  '<button class="btn btn-sm btn-ghost" type="button" data-action="delete-exercise" data-ex="' + esc(ex.id) + '" aria-label="' + esc(ex.name) + ' hareketini sil">Sil</button>' +
+                '</div>' +
+              '</div>';
+
+      if (ex.sets.length) {
+        html += '<div class="sets-head" aria-hidden="true"><span>Set</span><span>Kilo</span><span>Tekrar</span><span style="text-align:right">Hacim</span><span></span></div>';
+        html += ex.sets.map(function (set, sIdx) {
+          const isPR = !!set.isPR && num(set.weight) > 0;
+          return '<div class="set-row' + (isPR ? ' is-pr' : '') + '" data-set-id="' + esc(set.id) + '">' +
+                   '<span class="set-index">' + (sIdx + 1) + (isPR ? ' 🏆' : '') + '</span>' +
+                   '<input class="set-input weight" type="number" inputmode="decimal" step="0.5" min="0" ' +
+                     'placeholder="kilo" value="' + (set.weight ? num(set.weight) : '') + '" ' +
+                     'data-field="weight" data-ex="' + esc(ex.id) + '" data-set="' + esc(set.id) + '" aria-label="' + (sIdx + 1) + '. set ağırlığı (kg)">' +
+                   '<input class="set-input reps" type="number" inputmode="numeric" step="1" min="0" ' +
+                     'placeholder="tekrar" value="' + (set.reps ? num(set.reps) : '') + '" ' +
+                     'data-field="reps" data-ex="' + esc(ex.id) + '" data-set="' + esc(set.id) + '" aria-label="' + (sIdx + 1) + '. set tekrar sayısı">' +
+                   '<span class="set-volume">' + (setVolume(set) ? formatKg(setVolume(set)) : '—') + '</span>' +
+                   '<button class="row-del" type="button" data-action="delete-set" data-ex="' + esc(ex.id) + '" data-set="' + esc(set.id) + '" aria-label="' + (sIdx + 1) + '. seti sil">' +
+                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+                       '<line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/>' +
+                     '</svg>' +
+                   '</button>' +
+                 '</div>';
+        }).join('');
+      } else {
+        html += '<p class="section-sub" style="margin-bottom:8px">Henüz set yok.</p>';
+      }
+
+      html += '<button class="add-set-btn" type="button" data-action="add-set" data-ex="' + esc(ex.id) + '">+ Set Ekle</button>';
+      html += '<div class="progress-track"><div class="progress-fill" style="width:' + progress.toFixed(1) + '%"></div></div>';
+      html += '</article>';
+      return html;
+    }
+
+    function renderProgramSelector() {
+      let html = '<div class="program-selector" role="group" aria-label="Program seç">';
+      Object.keys(PROGRAMS).forEach(function (key) {
+        const p = PROGRAMS[key];
+        const active = state.activeProgram === key;
+        html += '<button type="button" class="program-chip" data-program="' + key + '" aria-pressed="' + (active ? 'true' : 'false') + '" ' +
+                'style="--chip-color:' + p.color + ';--chip-bg:' + hexToRgba(p.color, .16) + '">' +
+                  '<span class="chip-dot" aria-hidden="true"></span>' + p.emoji + ' ' + esc(p.name) +
+                '</button>';
+      });
+      html += '</div>';
+      return html;
+    }
+
+    /* ---------- Hafta görünümü ---------- */
+    function renderWeekView(panel) {
+      const weekStart = startOfWeek(parseISO(state.selectedDate));
+      const dates = weekDates(weekStart);
+      const from = toISO(dates[0]), to = toISO(dates[6]);
+      const weekVol = volumeInRange(from, to);
+      const weekSets = state.exercises.reduce(function (sum, ex) {
+        if (ex.date >= from && ex.date <= to) return sum + ex.sets.length;
+        return sum;
+      }, 0);
+      const workoutDays = workoutsInRange(from, to);
+      const maxVol = Math.max.apply(null, dates.map(function (d) { return volumeOn(toISO(d)); }).concat([1]));
+
+      let html = '<div class="section-head">' +
+                   '<div><h2 class="section-title">Hafta Özeti</h2>' +
+                   '<p class="section-sub">' + esc(formatDateShort(from)) + ' – ' + esc(formatDateShort(to)) + '</p></div>' +
+                 '</div>';
+
+      html += '<div class="stats-grid">' +
+                statCard(formatKg(weekVol), 'kg·tekrar', 'Haftalık Hacim', true) +
+                statCard(weekSets, '', 'Toplam Set', false) +
+                statCard(workoutDays + '/7', '', 'Antrenman Günü', false) +
+                statCard(formatKg(weekVol / 7), 'kg·tekrar', 'Günlük Ortalama', false) +
+              '</div>';
+
+      html += '<div class="week-summary">';
+      dates.forEach(function (d) {
+        const iso = toISO(d);
+        const vol = volumeOn(iso);
+        const pct = (vol / maxVol) * 100;
+        const exs = exercisesOn(iso);
+        html += '<button type="button" class="summary-row' + (iso === state.selectedDate ? ' is-selected' : '') + '" data-date="' + iso + '">' +
+                  '<span class="summary-day">' + esc(DAY_SHORT[d.getDay()]) +
+                    '<small>' + d.getDate() + ' ' + esc(MONTH_NAMES[d.getMonth()]) + '</small>' +
+                  '</span>' +
+                  '<span class="bar-track"><span class="bar-fill" style="width:' + pct.toFixed(1) + '%"></span></span>' +
+                  '<span class="summary-value">' + (exs.length ? formatKg(vol) : '—') +
+                    '<small>' + (exs.length ? exs.length + ' hareket' : 'dinsiz') + '</small>' +
+                  '</span>' +
+                '</button>';
+      });
+      html += '</div>';
+
+      /* ---------- Geçen haftanın özeti ---------- */
+      const prevFrom = toISO(addDays(dates[0], -7));
+      const prevTo = toISO(addDays(dates[6], -7));
+      const prevVol = volumeInRange(prevFrom, prevTo);
+      const prevDays = workoutsInRange(prevFrom, prevTo);
+      const prevSets = state.exercises.reduce(function (sum, ex) {
+        if (ex.date >= prevFrom && ex.date <= prevTo) return sum + ex.sets.length;
+        return sum;
+      }, 0);
+      const prevMaxVol = Math.max.apply(null, weekDates(addDays(dates[0], -7))
+        .map(function (d) { return volumeOn(toISO(d)); }).concat([1]));
+
+      html += '<div class="section-head" style="margin-top:26px">' +
+                '<div><h2 class="section-title">Geçen Hafta</h2>' +
+                '<p class="section-sub">' + esc(formatDateShort(prevFrom)) + ' – ' + esc(formatDateShort(prevTo)) + '</p></div>' +
+                '<div class="compare-actions">' +
+                  '<button class="btn btn-sm btn-secondary" type="button" data-action="goto-prev-week">Geçen Haftaya Git</button>' +
+                '</div>' +
+              '</div>';
+
+      html += '<div class="stats-grid">' +
+                statCard(formatKg(prevVol), 'kg·tekrar', 'Geçen Hafta Hacmi', false) +
+                statCard(prevSets, '', 'Geçen Hafta Set', false) +
+                statCard(prevDays + '/7', '', 'Antrenman Günü', false) +
+                statCard(prevVol > 0 ? formatKg(prevVol / 7) : '0', 'kg·tekrar', 'Günlük Ortalama', false) +
+              '</div>';
+
+      html += '<div class="week-summary is-prev">';
+      weekDates(addDays(dates[0], -7)).forEach(function (d) {
+        const iso = toISO(d);
+        const vol = volumeOn(iso);
+        const pct = (vol / prevMaxVol) * 100;
+        const exs = exercisesOn(iso);
+        html += '<button type="button" class="summary-row" data-date="' + iso + '">' +
+                  '<span class="summary-day">' + esc(DAY_SHORT[d.getDay()]) +
+                    '<small>' + d.getDate() + ' ' + esc(MONTH_NAMES[d.getMonth()]) + '</small>' +
+                  '</span>' +
+                  '<span class="bar-track"><span class="bar-fill" style="width:' + pct.toFixed(1) + '%"></span></span>' +
+                  '<span class="summary-value">' + (exs.length ? formatKg(vol) : '—') +
+                    '<small>' + (exs.length ? exs.length + ' hareket' : 'dinsiz') + '</small>' +
+                  '</span>' +
+                '</button>';
+      });
+      html += '</div>';
+
+      html += '<p class="section-sub" style="margin-top:14px">Bir güne tıklayarak o günün detaylarına geçebilirsin.</p>';
+      panel.innerHTML = html;
+    }
+
+    /* ---------- Ay görünümü ---------- */
+    function renderMonthView(panel) {
+      const selected = parseISO(state.selectedDate);
+      const year = selected.getFullYear();
+      const month = selected.getMonth();
+      const range = monthRange(selected);
+      const monthVol = volumeInRange(range.from, range.to);
+      const monthWorkouts = workoutsInRange(range.from, range.to);
+      const monthSets = state.exercises.reduce(function (sum, ex) {
+        if (ex.date >= range.from && ex.date <= range.to) return sum + ex.sets.length;
+        return sum;
+      }, 0);
+
+      let html = '<div class="section-head">' +
+                   '<div><h2 class="section-title">' + MONTH_NAMES[month] + ' ' + year + '</h2>' +
+                   '<p class="section-sub">Aylık antrenman özeti</p></div>' +
+                 '</div>';
+
+      html += '<div class="stats-grid">' +
+                statCard(formatKg(monthVol), 'kg·tekrar', 'Aylık Hacim', true) +
+                statCard(monthWorkouts, '', 'Antrenman', false) +
+                statCard(monthSets, '', 'Toplam Set', false) +
+                statCard(formatKg(monthVol / Math.max(1, monthWorkouts)), 'kg·tekrar', 'Antrenman Başına', false) +
+              '</div>';
+
+      /* --- Takvim --- */
+      const first = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const gridStart = startOfWeek(first);
+      const gridEnd = addDays(startOfWeek(lastDay), 6);
+      const today = todayISO();
+
+      /* Ayın tamamını kapsayan hücreler (Pzt başlangıçlı) */
+      const cells = [];
+      for (let d = new Date(gridStart); d <= gridEnd; d = addDays(d, 1)) {
+        cells.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+      }
+
+      html += '<div class="calendar">';
+      WEEK_ORDER.forEach(function (dow) {
+        html += '<div class="cal-head">' + esc(DAY_SHORT[dow]) + '</div>';
+      });
+      cells.forEach(function (d) {
+        const iso = toISO(d);
+        const vol = volumeOn(iso);
+        const outside = !sameMonth(d, first);
+        html += '<button type="button" class="cal-cell' + (outside ? ' is-outside' : '') + (iso === today ? ' is-today' : '') + (vol > 0 ? ' has-workout' : '') + '" ' +
+                'data-date="' + iso + '" aria-pressed="' + (iso === state.selectedDate ? 'true' : 'false') + '" ' +
+                'aria-label="' + esc(d.getDate() + ' ' + MONTH_NAMES[d.getMonth()] + (vol > 0 ? ', ' + formatKg(vol) + ' kg hacim' : '')) + '">' +
+                  '<span class="cal-num">' + d.getDate() + '</span>' +
+                  '<span class="cal-vol">' + (vol > 0 ? formatKg(vol) + ' kg' : '') + '</span>' +
+                '</button>';
+      });
+      html += '</div>';
+
+      /* --- Rekorlar --- */
+      const prs = personalRecords();
+      html += '<h3 class="section-title" style="margin-top:22px;font-size:15px">Rekorlar</h3>';
+      if (!prs.length) {
+        html += '<p class="section-sub" style="margin-top:8px">Henüz ağırlık kaydı yok. Bir sete kilo girildiğinde burada listelenir.</p>';
+      } else {
+        html += '<div class="pr-list" style="margin-top:10px">';
+        prs.slice(0, 8).forEach(function (pr) {
+          html += '<div class="pr-row">' +
+                    '<div><div class="pr-name">' + esc(pr.name) + '</div>' +
+                    '<div class="pr-date">' + esc(formatDateShort(pr.date)) + '</div></div>' +
+                    '<div class="pr-weight">' + formatKg(pr.weight) + ' kg</div>' +
+                  '</div>';
+        });
+        html += '</div>';
+      }
+
+      panel.innerHTML = html;
+    }
+
+    /* ============================================================
+       11. Render — aylık hedef kartı
+       ============================================================ */
+    function renderGoal() {
+      const card = document.getElementById('goalCard');
+      const selected = parseISO(state.selectedDate);
+      const range = monthRange(selected);
+      const current = volumeInRange(range.from, range.to);
+      const goal = num(state.monthlyGoal);
+      const pct = goal > 0 ? Math.min(100, (current / goal) * 100) : 0;
+
+      card.innerHTML =
+        '<div class="goal-head">' +
+          '<div>' +
+            '<div class="goal-title">' + esc(MONTH_NAMES[selected.getMonth()]) + ' Hacim Hedefi</div>' +
+            '<div class="goal-sub">' + esc(formatDateShort(range.from)) + ' – ' + esc(formatDateShort(range.to)) + ' arası toplam hacim</div>' +
+          '</div>' +
+          '<button class="btn btn-sm btn-secondary" type="button" data-action="edit-goal">Hedefi Düzenle</button>' +
+        '</div>' +
+        '<div class="goal-values" style="margin-bottom:10px">' +
+          '<span class="goal-current">' + formatKg(current) + '</span>' +
+          '<span class="goal-target">/ ' + formatKg(goal) + ' kg·tekrar (' + pct.toFixed(0) + '%)</span>' +
+        '</div>' +
+        '<div class="progress-track" style="margin-top:0"><div class="progress-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
+    }
+
+    /* ============================================================
+       12. Tüm render'ı tetikleyen fonksiyon
+       ============================================================ */
+    function render() {
+      renderDays();
+      renderView();
+      renderGoal();
+    }
+
+    /* ============================================================
+       13. Veri işlemleri
+       ============================================================ */
+    function addExercise(name, program) {
+      const ex = {
+        id: uid('ex'),
+        name: name,
+        program: (program && PROGRAMS[program]) ? program : (state.activeProgram || 'custom'),
+        date: state.selectedDate,
+        sets: [{ id: uid('set'), weight: 0, reps: 8 }]
+      };
+      state.exercises.push(ex);
+      return ex;
+    }
+
+    /**
+     * Bir egzersizi hedef güne kopyalar.
+     * @param mode 'plain'  → aynı kilo/tekrar
+     *        'progression' → artış uygulanmış hedef değerler
+     */
+    function copyExercise(src, targetDate, mode) {
+      const program = (src.program && PROGRAMS[src.program]) ? src.program : 'custom';
+      const ex = {
+        id: uid('ex'),
+        name: src.name,
+        program: program,
+        date: targetDate,
+        sets: []
+      };
+
+      if (mode === 'progression') {
+        const targets = progressionTargets(src);
+        if (targets.sets.length) {
+          ex.sets = targets.sets.map(function (t) {
+            return { id: uid('set'), weight: t.weight, reps: t.reps };
+          });
+        } else {
+          ex.sets = [{ id: uid('set'), weight: 0, reps: 8 }];
+        }
+      } else {
+        ex.sets = src.sets.map(function (s) {
+          return { id: uid('set'), weight: num(s.weight), reps: num(s.reps) };
+        });
+        if (!ex.sets.length) ex.sets = [{ id: uid('set'), weight: 0, reps: 8 }];
+      }
+
+      state.exercises.push(ex);
+      return ex;
+    }
+
+    /**
+     * Bir günün tüm hareketlerini hedef güne kopyalar.
+     * @param mode 'plain' | 'progression'
+     * @param skipExisting true ise aynı isimli hareketler atlanır
+     */
+    function copyDay(sourceDate, targetDate, mode, skipExisting) {
+      const srcs = exercisesOn(sourceDate);
+      if (!srcs.length) return { copied: 0, skipped: 0 };
+
+      const existing = exercisesOn(targetDate).map(function (e) {
+        return e.name.toLowerCase();
+      });
+
+      let copied = 0, skipped = 0;
+      srcs.forEach(function (src) {
+        const key = src.name.toLowerCase();
+        if (skipExisting && existing.indexOf(key) !== -1) {
+          skipped++;
+          return;
+        }
+        copyExercise(src, targetDate, mode);
+        existing.push(key);
+        copied++;
+      });
+
+      return { copied: copied, skipped: skipped };
+    }
+
+    /** Tek bir hareketi geçen haftadan bu güne kopyalar */
+    function copySingleExercise(srcDate, name, mode) {
+      const src = exercisesOn(srcDate).find(function (e) {
+        return e.name.toLowerCase() === String(name).toLowerCase();
+      });
+      if (!src) {
+        toast('Kaynak hareket bulunamadı.', 'warning');
+        return;
+      }
+
+      const already = exercisesOn(state.selectedDate).some(function (e) {
+        return e.name.toLowerCase() === src.name.toLowerCase();
+      });
+
+      if (already) {
+        toast('"' + src.name + '" bu gün zaten var.', 'warning');
+        return;
+      }
+
+      copyExercise(src, state.selectedDate, mode);
+      applyPRFlags();
+      saveState();
+      render();
+
+      const t = progressionTargets(src);
+      const lastT = t.sets[t.sets.length - 1];
+      if (mode === 'progression' && lastT) {
+        toast('"' + src.name + '" eklendi → hedef: ' + formatKg(lastT.weight) + ' kg × ' + formatKg(lastT.reps), 'success');
+      } else {
+        toast('"' + src.name + '" kopyalandı.', 'success');
+      }
+    }
+
+    /** Seçili kaynak günün tüm hareketlerini bu güne kopyalar */
+    function copyWholeWeek(mode) {
+      const srcISO = resolveCopySource();
+      const result = copyDay(srcISO, state.selectedDate, mode, true);
+
+      if (!result.copied) {
+        toast(result.skipped ? 'Seçilen gündeki hareketler zaten bu gün var.' : 'Kaynak günde kayıt bulunamadı.', 'warning');
+        return;
+      }
+
+      applyPRFlags();
+      saveState();
+      render();
+
+      const label = mode === 'progression' ? 'artış uygulandı' : 'aynen kopyalandı';
+      let msg = result.copied + ' hareket ' + label;
+      if (result.skipped) msg += ' · ' + result.skipped + ' hareket zaten vardı';
+      toast(msg, 'success');
+    }
+
+    /** Kopyalama kaynağı: seçili gün ya da önceki haftanın aynı günü */
+    function resolveCopySource() {
+      const prevISO = sameDayPreviousWeek(state.selectedDate);
+      const prevBounds = weekBounds(prevISO);
+      if (state.copySourceDate && prevBounds.dates.some(function (d) {
+        return toISO(d) === state.copySourceDate;
+      })) {
+        return state.copySourceDate;
+      }
+      return prevISO;
+    }
+
+    function findExercise(id) {
+      return state.exercises.find(function (e) { return e.id === id; }) || null;
+    }
+
+    function findSet(exerciseId, setId) {
+      const ex = findExercise(exerciseId);
+      if (!ex) return null;
+      return ex.sets.find(function (s) { return s.id === setId; }) || null;
+    }
+
+    function deleteExercise(id) {
+      const ex = findExercise(id);
+      if (!ex) return;
+      state.exercises = state.exercises.filter(function (e) { return e.id !== id; });
+      applyPRFlags();
+      saveState();
+      render();
+      toast('"' + ex.name + '" silindi.', 'success');
+    }
+
+    function deleteSet(exerciseId, setId) {
+      const ex = findExercise(exerciseId);
+      if (!ex) return;
+      ex.sets = ex.sets.filter(function (s) { return s.id !== setId; });
+      applyPRFlags();
+      saveState();
+      render();
+    }
+
+    function addSet(exerciseId) {
+      const ex = findExercise(exerciseId);
+      if (!ex) return;
+      const last = ex.sets[ex.sets.length - 1];
+      ex.sets.push({
+        id: uid('set'),
+        weight: last ? num(last.weight) : 0,
+        reps: last ? num(last.reps) : 8
+      });
+      applyPRFlags();
+      saveState();
+      render();
+    }
+
+    /** Set değeri değişti: ağırlık/rep güncelle, PR kontrolü yap, ilgili DOM parçalarını tazele */
+    function updateSet(exerciseId, setId, field, rawValue) {
+      const ex = findExercise(exerciseId);
+      const set = findSet(exerciseId, setId);
+      if (!ex || !set) return;
+
+      const value = Math.max(0, num(rawValue));
+      const prevWeight = num(set.weight);
+      set[field] = value;
+
+      if (field === 'weight') {
+        const wasPR = !!set.isPR;
+        applyPRFlags();
+        const isPR = !!set.isPR;
+        if (isPR && !wasPR) {
+          toast('🏆 Yeni rekor! ' + ex.name + ': ' + formatKg(value) + ' kg', 'success');
+        } else if (!isPR && wasPR) {
+          toast('Rekor düştü — ' + ex.name + ' için yeni rekor: ' + formatKg(exerciseBest(ex)) + ' kg', 'warning');
+        } else if (isPR && value > prevWeight) {
+          toast('🏆 Rekor yükseldi! ' + ex.name + ': ' + formatKg(value) + ' kg', 'success');
+        }
+      }
+
+      saveState();
+      refreshExerciseDerived(ex, set);
+      renderDays();
+      renderGoal();
+      refreshDayStats();
+    }
+
+    /** Gün görünümündeki üst istatistik kartlarını odak kaybetmeden tazele */
+    function refreshDayStats() {
+      if (state.view !== 'gun') return;
+      const iso = state.selectedDate;
+      const exs = exercisesOn(iso);
+      const cards = document.querySelectorAll('#viewPanel .stat-card');
+      if (cards.length < 4) return;
+
+      const values = [
+        formatKg(volumeOn(iso)),
+        String(setsOn(iso)),
+        formatKg(exs.reduce(function (m, ex) { return Math.max(m, exerciseBest(ex)); }, 0)),
+        String(exs.length)
+      ];
+      cards.forEach(function (card, i) {
+        const valEl = card.querySelector('.stat-value');
+        if (!valEl) return;
+        const unitEl = valEl.querySelector('.unit');
+        valEl.textContent = values[i];
+        if (unitEl) valEl.appendChild(unitEl);
+      });
+    }
+
+    /** Sadece türetilmiş değerleri tazele (input odağını bozmadan) */
+    function refreshExerciseDerived(ex, changedSet) {
+      const card = document.querySelector('.exercise-card[data-exercise-id="' + ex.id + '"]');
+      if (!card) return;
+
+      const best = exerciseBest(ex);
+      const volume = exerciseVolume(ex);
+      const lastSet = ex.sets[ex.sets.length - 1];
+      const lastWeight = lastSet ? num(lastSet.weight) : 0;
+      const progress = best > 0 ? Math.min(100, (lastWeight / best) * 100) : 0;
+
+      const stats = card.querySelectorAll('.ex-stat-value');
+      if (stats[0]) stats[0].textContent = formatKg(volume);
+      if (stats[1]) stats[1].textContent = formatKg(best);
+
+      const fill = card.querySelector('.progress-fill');
+      if (fill) fill.style.width = progress.toFixed(1) + '%';
+
+      /* Tüm satırların PR görünümünü senkronla (set eklenince bayrak eski sette kalmasın) */
+      ex.sets.forEach(function (s, sIdx) {
+        const row = card.querySelector('.set-row[data-set-id="' + s.id + '"]');
+        if (!row) return;
+        const isPR = !!s.isPR && num(s.weight) > 0;
+        row.classList.toggle('is-pr', isPR);
+        const idxEl = row.querySelector('.set-index');
+        if (idxEl) idxEl.textContent = (sIdx + 1) + (isPR ? ' 🏆' : '');
+        const volEl = row.querySelector('.set-volume');
+        if (volEl) volEl.textContent = setVolume(s) ? formatKg(setVolume(s)) : '—';
+      });
+
+      /* Rekor rozetini güncelle */
+      const hasPR = ex.sets.some(function (s) { return !!s.isPR && num(s.weight) > 0; });
+      const title = card.querySelector('.exercise-title');
+      const badge = title ? title.querySelector('.badge-pr') : null;
+      if (hasPR && !badge) {
+        const span = document.createElement('span');
+        span.className = 'badge badge-pr';
+        span.textContent = '🏆 Rekor';
+        title.appendChild(span);
+      } else if (!hasPR && badge) {
+        badge.remove();
+      }
+    }
+
+    /* ============================================================
+       14. Modal eylemleri
+       ============================================================ */
+    function openExerciseModal() {
+      const existing = exercisesOn(state.selectedDate).map(function (e) {
+        return e.name.toLowerCase();
+      });
+
+      const body = document.createElement('div');
+
+      let html = '<h3 class="modal-title">Hareket Ekle</h3>' +
+                 '<p class="modal-description">' + esc(formatDateLong(state.selectedDate)) + ' için hareket kaydı oluştur.</p>';
+
+      /* Öneriler — her zaman gösterilir, program seçiliyse ona göre */
+      const program = state.activeProgram ? PROGRAMS[state.activeProgram] : null;
+      const suggestions = [];
+      if (program) {
+        program.exercises.forEach(function (s) { if (existing.indexOf(s.toLowerCase()) === -1) suggestions.push(s); });
+      }
+      if (!suggestions.length) {
+        Object.keys(PROGRAMS).forEach(function (key) {
+          if (key === 'rest' || key === 'custom') return;
+          PROGRAMS[key].exercises.forEach(function (s) {
+            if (existing.indexOf(s.toLowerCase()) === -1 && suggestions.indexOf(s) === -1) suggestions.push(s);
+          });
+        });
+      }
+
+      if (suggestions.length) {
+        html += '<div class="suggestion-chips" id="suggestionChips">';
+        suggestions.forEach(function (s) {
+          html += '<button type="button" class="suggestion-chip" data-suggestion="' + esc(s) + '" aria-pressed="false">' + esc(s) + '</button>';
+        });
+        html += '</div>';
+      }
+
+      html += '<label class="modal-field"><span class="modal-label">Hareket adı</span>' +
+              '<input type="text" class="modal-input" id="customExerciseName" placeholder="Örn. Bench Press" autocomplete="off"></label>' +
+              '<div class="modal-actions">' +
+                '<button class="btn btn-secondary" type="button" data-modal="cancel">Vazgeç</button>' +
+                '<button class="btn btn-primary" type="button" data-modal="save">Kaydet</button>' +
+              '</div>';
+
+      body.innerHTML = html;
+
+      const overlay = openModal(function () { return body; }, function (content) {
+        const input = content.querySelector('#customExerciseName');
+        setTimeout(function () { input.focus(); }, 60);
+
+        content.querySelectorAll('.suggestion-chip').forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            content.querySelectorAll('.suggestion-chip').forEach(function (c) {
+              c.setAttribute('aria-pressed', 'false');
+            });
+            chip.setAttribute('aria-pressed', 'true');
+            input.value = chip.dataset.suggestion;
+            input.focus();
+          });
+        });
+
+        content.querySelector('[data-modal="cancel"]').addEventListener('click', function () {
+          closeModal(overlay);
+        });
+
+        content.querySelector('[data-modal="save"]').addEventListener('click', function () {
+          const name = input.value.trim();
+          if (!name) {
+            toast('Lütfen bir hareket adı girin.', 'warning');
+            input.focus();
+            return;
+          }
+          const exists = state.exercises.some(function (e) {
+            return e.date === state.selectedDate && e.name.toLowerCase() === name.toLowerCase();
+          });
+          if (exists) {
+            toast('Bu hareket bu gün zaten ekli.', 'warning');
+            return;
+          }
+          addExercise(name, state.activeProgram);
+          closeModal(overlay);
+          saveState();
+          render();
+          toast('"' + name + '" eklendi.', 'success');
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            content.querySelector('[data-modal="save"]').click();
+          }
+        });
+      });
+    }
+
+    function openProgramApplyModal() {
+      const body = document.createElement('div');
+      let html = '<h3 class="modal-title">Programdan Ekle</h3>' +
+                 '<p class="modal-description">Seçtiğin programın hareketlerini bu güne ekle.</p>' +
+                 '<div class="suggestion-chips" style="flex-direction:column;align-items:stretch">';
+
+      Object.keys(PROGRAMS).forEach(function (key) {
+        const p = PROGRAMS[key];
+        html += '<button type="button" class="suggestion-chip" data-apply-program="' + key + '" aria-pressed="false" ' +
+                'style="text-align:left">' + p.emoji + ' ' + esc(p.name) +
+                ' <span style="color:var(--muted)">(' + p.exercises.length + ' hareket)</span></button>';
+      });
+
+      html += '</div><div class="modal-actions">' +
+              '<button class="btn btn-secondary" type="button" data-modal="cancel">Vazgeç</button>' +
+            '</div>';
+
+      body.innerHTML = html;
+
+      const overlay = openModal(function () { return body; }, function (content) {
+        content.querySelector('[data-modal="cancel"]').addEventListener('click', function () { closeModal(overlay); });
+        content.querySelectorAll('[data-apply-program]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const key = btn.dataset.applyProgram;
+            const p = PROGRAMS[key];
+            const existing = exercisesOn(state.selectedDate).map(function (e) { return e.name.toLowerCase(); });
+            let added = 0;
+            p.exercises.forEach(function (name) {
+              if (existing.indexOf(name.toLowerCase()) === -1) {
+                addExercise(name, key);
+                added++;
+              }
+            });
+            closeModal(overlay);
+            saveState();
+            render();
+            toast(added ? added + ' hareket eklendi (' + p.name + ').' : 'Bu programdaki hareketler zaten ekli.', added ? 'success' : 'warning');
+          });
+        });
+      });
+    }
+
+    function openGoalModal() {
+      const body = document.createElement('div');
+      body.innerHTML =
+        '<h3 class="modal-title">Aylık Hedef</h3>' +
+        '<p class="modal-description">kg·tekrar cinsinden aylık toplam hacim hedefi.</p>' +
+        '<label class="modal-field"><span class="modal-label">Hedef</span>' +
+        '<input type="number" class="modal-input" id="goalInput" min="1" step="100" value="' + num(state.monthlyGoal) + '"></label>' +
+        '<div class="modal-actions">' +
+          '<button class="btn btn-secondary" type="button" data-modal="cancel">Vazgeç</button>' +
+          '<button class="btn btn-primary" type="button" data-modal="save">Kaydet</button>' +
+        '</div>';
+
+      const overlay = openModal(function () { return body; }, function (content) {
+        const input = content.querySelector('#goalInput');
+        setTimeout(function () { input.focus(); input.select(); }, 60);
+        content.querySelector('[data-modal="cancel"]').addEventListener('click', function () { closeModal(overlay); });
+        content.querySelector('[data-modal="save"]').addEventListener('click', function () {
+          const v = num(input.value);
+          if (v <= 0) { toast('Geçerli bir hedef girin.', 'warning'); return; }
+          state.monthlyGoal = v;
+          closeModal(overlay);
+          saveState();
+          renderGoal();
+          toast('Hedef güncellendi: ' + formatKg(v) + ' kg·tekrar', 'success');
+        });
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); content.querySelector('[data-modal="save"]').click(); }
+        });
+      });
+    }
+
+    /** Progresif artış kurallarını düzenleme modalı */
+    function openProgressionModal() {
+      const p = state.progression;
+      const body = document.createElement('div');
+      body.innerHTML =
+        '<h3 class="modal-title">Progresif Artış Kuralları</h3>' +
+        '<p class="modal-description">Her hafta hedef değerlerin ne kadar artacağı. Hareket adında "squat", "leg", "deadlift" gibi ipuçları varsa alt vücut kuralı uygulanır.</p>' +
+        '<label class="modal-field"><span class="modal-label">Üst vücut — kilo artışı (kg)</span>' +
+        '<input type="number" class="modal-input" id="stepUpper" min="0" step="0.5" value="' + num(p.weightStep) + '"></label>' +
+        '<label class="modal-field"><span class="modal-label">Alt vücut — kilo artışı (kg)</span>' +
+        '<input type="number" class="modal-input" id="stepLower" min="0" step="0.5" value="' + num(p.weightStepLower) + '"></label>' +
+        '<label class="modal-field"><span class="modal-label">Tekrar artışı</span>' +
+        '<input type="number" class="modal-input" id="stepReps" min="0" step="1" value="' + num(p.repStep) + '"></label>' +
+        '<div class="modal-actions">' +
+          '<button class="btn btn-secondary" type="button" data-modal="cancel">Vazgeç</button>' +
+          '<button class="btn btn-primary" type="button" data-modal="save">Kaydet</button>' +
+        '</div>';
+
+      const overlay = openModal(function () { return body; }, function (content) {
+        const upperEl = content.querySelector('#stepUpper');
+        const lowerEl = content.querySelector('#stepLower');
+        const repsEl = content.querySelector('#stepReps');
+        setTimeout(function () { upperEl.focus(); }, 60);
+
+        content.querySelector('[data-modal="cancel"]').addEventListener('click', function () { closeModal(overlay); });
+        content.querySelector('[data-modal="save"]').addEventListener('click', function () {
+          state.progression.weightStep = Math.max(0, num(upperEl.value));
+          state.progression.weightStepLower = Math.max(0, num(lowerEl.value));
+          state.progression.repStep = Math.max(0, Math.round(num(repsEl.value)));
+          closeModal(overlay);
+          saveState();
+          render();
+          toast('Artış kuralları güncellendi.', 'success');
+        });
+      });
+    }
+
+    function openConfirmModal(title, message, onConfirm) {
+      const body = document.createElement('div');
+      body.innerHTML =
+        '<h3 class="modal-title">' + esc(title) + '</h3>' +
+        '<p class="modal-description">' + esc(message) + '</p>' +
+        '<div class="modal-actions">' +
+          '<button class="btn btn-secondary" type="button" data-modal="cancel">Vazgeç</button>' +
+          '<button class="btn btn-danger" type="button" data-modal="confirm">Sil</button>' +
+        '</div>';
+
+      const overlay = openModal(function () { return body; }, function (content) {
+        content.querySelector('[data-modal="cancel"]').addEventListener('click', function () { closeModal(overlay); });
+        content.querySelector('[data-modal="confirm"]').addEventListener('click', function () {
+          closeModal(overlay);
+          onConfirm();
+        });
+        setTimeout(function () { content.querySelector('[data-modal="confirm"]').focus(); }, 60);
+      });
+    }
+
+    /* ============================================================
+       15. Olay bağlama (delegation)
+       ============================================================ */
+    function bindEvents() {
+      /* Tema */
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+      /* Sekmeler */
+      document.querySelectorAll('.nav-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          if (state.view === tab.dataset.view) return;
+          state.view = tab.dataset.view;
+          saveState();
+          render();
+        });
+      });
+
+      /* Hafta gezinme */
+      document.getElementById('prevWeek').addEventListener('click', function () {
+        state.selectedDate = toISO(addDays(parseISO(state.selectedDate), -7));
+        state.copySourceDate = null;
+        saveState();
+        render();
+      });
+      document.getElementById('nextWeek').addEventListener('click', function () {
+        state.selectedDate = toISO(addDays(parseISO(state.selectedDate), 7));
+        state.copySourceDate = null;
+        saveState();
+        render();
+      });
+
+      /* Gün ızgarası / takvim / hafta özeti — ortak tarih seçimi */
+      document.addEventListener('click', function (e) {
+        const dateEl = e.target.closest('[data-date]');
+        if (dateEl && dateEl.closest('#daysGrid, .calendar, .week-summary')) {
+          state.selectedDate = dateEl.dataset.date;
+          state.copySourceDate = null;
+          saveState();
+          render();
+          return;
+        }
+
+        /* Program çipi */
+        const chip = e.target.closest('[data-program]');
+        if (chip) {
+          const key = chip.dataset.program;
+          state.activeProgram = state.activeProgram === key ? null : key;
+          render();
+          return;
+        }
+
+        /* Buton eylemleri */
+        const actionEl = e.target.closest('[data-action]');
+        if (!actionEl) return;
+        const action = actionEl.dataset.action;
+
+        if (action === 'add-exercise') {
+          openExerciseModal();
+        } else if (action === 'add-from-program') {
+          openProgramApplyModal();
+        } else if (action === 'edit-goal') {
+          openGoalModal();
+        } else if (action === 'goto-prev-week') {
+          state.selectedDate = sameDayPreviousWeek(state.selectedDate);
+          state.copySourceDate = null;
+          state.view = 'gun';
+          saveState();
+          render();
+        } else if (action === 'edit-progression') {
+          openProgressionModal();
+        } else if (action === 'add-set') {
+          addSet(actionEl.dataset.ex);
+        } else if (action === 'delete-set') {
+          deleteSet(actionEl.dataset.ex, actionEl.dataset.set);
+        } else if (action === 'delete-exercise') {
+          const ex = findExercise(actionEl.dataset.ex);
+          if (ex) {
+            openConfirmModal(
+              'Hareketi sil',
+              '"' + ex.name + '" ve tüm set kayıtları silinecek. Emin misin?',
+              function () { deleteExercise(ex.id); }
+            );
+          }
+        } else if (action === 'copy-ex-plain') {
+          copySingleExercise(actionEl.dataset.src, actionEl.dataset.name, 'plain');
+        } else if (action === 'copy-ex-progression') {
+          copySingleExercise(actionEl.dataset.src, actionEl.dataset.name, 'progression');
+        } else if (action === 'copy-week-plain') {
+          copyWholeWeek('plain');
+        } else if (action === 'copy-week-progression') {
+          copyWholeWeek('progression');
+        }
+      });
+
+      /* Geçen haftanın gün seçici — hangi günün kopyalanacağını belirler */
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-copy-date]');
+        if (!btn) return;
+        state.copySourceDate = btn.dataset.copyDate;
+        render();
+      });
+
+      /* Set input girişleri — odak kaybetmeden canlı güncelle */
+      document.addEventListener('input', function (e) {
+        const input = e.target.closest('.set-input');
+        if (!input) return;
+        updateSet(input.dataset.ex, input.dataset.set, input.dataset.field, input.value);
+      });
+
+      /* Sayı alanlarında ok tuşları tetiklemez — sadece değişimde de kaydet */
+      document.addEventListener('change', function (e) {
+        const input = e.target.closest('.set-input');
+        if (!input) return;
+        updateSet(input.dataset.ex, input.dataset.set, input.dataset.field, input.value);
+      });
+    }
+
+    /* ============================================================
+       16. Başlat
+       ============================================================ */
+    function init() {
+      loadState();
+      applyPRFlags();
+      applyTheme();
+      bindEvents();
+      render();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
